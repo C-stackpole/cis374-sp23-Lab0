@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 
 namespace Lab0
 {
@@ -58,7 +59,23 @@ namespace Lab0
         }
 
         // TODO
-        public int? MaxKey => throw new NotImplementedException();
+        public int? MaxKey => MaxKeyRecursive(Root);
+
+        private int? MaxKeyRecursive(BinarySearchTreeNode<T> node)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+            else if (node.Right == null)
+            {
+                return node.Key;
+            }
+            else
+            {
+                return MaxKeyRecursive(node.Right);
+            }
+        }
 
         // TODO
         public double MedianKey
@@ -193,12 +210,21 @@ namespace Lab0
         // TODO
         public BinarySearchTreeNode<T> Next(BinarySearchTreeNode<T> node)
         {
-            // find the min node in the right child's subtree
-            if (node.Right != null)
+            int index = 0;
+            if (node.Key < MinKey || node.Key > MaxKey)
             {
-
+                return null;
             }
-
+            else
+            {
+                foreach (int key in InOrderKeys)
+                {
+                    if (node.Key == key)
+                    {
+                        return GetNode(InOrderKeys[index + 1]);
+                    }
+                }
+            }
             return null;
 
         }
@@ -206,7 +232,22 @@ namespace Lab0
         // TODO
         public BinarySearchTreeNode<T> Prev(BinarySearchTreeNode<T> node)
         {
-            throw new NotImplementedException();
+            int index = 0;
+            if (node.Key < MinKey || node.Key > MaxKey)
+            {
+                return null; 
+            }
+            else
+            {
+                foreach (int key in InOrderKeys)
+                {
+                    if (node.Key == key)
+                    {
+                        return GetNode(InOrderKeys[index - 1]);
+                    }
+                }
+            }
+            return null;
         }
 
         // TODO
@@ -336,7 +377,15 @@ namespace Lab0
             // Swap Key and Data from successor to node
             // Remove the successor (a leaf node) (like case 1)
 
-
+            else
+            {
+                var next_node = Next(node);
+                var next_node_parent = Next(node).Parent;
+                node.Key = next_node.Key;
+                node.Value = next_node.Value;
+                next_node_parent.Left = null;
+                next_node.Parent = null;
+            }
 
 
 
@@ -358,7 +407,14 @@ namespace Lab0
         // TODO
         public void Update(int key, T value)
         {
-            throw new NotImplementedException();
+            if (Contains(key))
+            {
+                GetNode(key).Value = value;
+            }
+            else
+            {
+                return;
+            }
         }
 
 
@@ -441,11 +497,30 @@ namespace Lab0
             }
         }
 
-        Tuple<int, T> IBinarySearchTree<T>.Max => throw new NotImplementedException();
+        Tuple<int, T> IBinarySearchTree<T>.Max
+        {
+            get
+            {
+                if (IsEmpty)
+                {
+                    return null;
+                }
+
+                var maxNode = MaxNode(Root);
+                return Tuple.Create(maxNode.Key, maxNode.Value);
+            }
+        }
 
         private void PostOrderKeysRecursive(BinarySearchTreeNode<T> node, List<int> keys)
         {
-            
+            if (node == null)
+            {
+                return;
+            }
+
+            PostOrderKeysRecursive(node.Left, keys);
+            PostOrderKeysRecursive(node.Right, keys);
+            keys.Add(node.Key);
         }
 
         public BinarySearchTreeNode<T> MinNode(BinarySearchTreeNode<T> node)
